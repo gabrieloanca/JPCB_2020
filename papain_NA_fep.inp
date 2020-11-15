@@ -1,0 +1,122 @@
+# Molaris input
+papain.pdb keepallh keephis
+
+# add S-S bridges between CYS residues 22-63, 56-95 and 153-200
+analyze
+    addbond  1   340   964
+    addbond  1   855  1473
+    addbond  1  2356  3050
+end
+
+enzymix
+    pre_enz
+        rest_in ../restart/restart_00/restart_00.res
+        ionres 158
+    end
+
+    evb
+        evb_state  2  1.00  0.00
+        map_pf     51 1 2p
+
+#       atom types, charges, and bonds
+        evb_atm   365     0.242649     C0     0.188310     C0  ! CB  ! CYS
+        evb_atm   366    -0.008957     H0     0.030691     H0  ! HB1
+        evb_atm   367    -0.008957     H0     0.030691     H0  ! HB2 
+        evb_atm   368    -1.224735     S-    -0.615279     S0  ! SG
+
+        evb_atm  3302     0.961959     C+     1.043122     C0  ! C   ! FRM
+        evb_atm  3303    -0.632450     O-    -1.017991     O-  ! O
+        evb_atm  3304    -0.849489     N-    -1.100358     N-  ! N
+        evb_atm  3305     0.519980     H0     0.440814     H0  ! HN
+
+        evb_bnd     0  365  366    ! CYM
+        evb_bnd     0  365  367
+        evb_bnd     0  365  368   
+        evb_bnd     2  368 3302    ! C'-S
+
+        evb_bnd     0 3302 3303    ! FRM
+        evb_bnd     0 3302 3304
+        evb_bnd     0 3304 3305
+
+        bond_harmonic
+        morse_pair    368   3302   90.0    1.860    1.4    2
+
+#      cys angles
+       kill_ang   366   365   363    0
+       add_ang    366   365   363    60.0   109.5    0    #  HB1-  CB-  CA
+         kill_ang   366   365   367    0
+         add_ang    366   365   367    60.0   109.5    0  #  HB1-  CB- HB2
+       kill_ang   366   365   368    0
+       add_ang    366   365   368    35.0   109.5    0    #  HB1-  CB-  SG
+         kill_ang   367   365   363    0
+         add_ang    367   365   363    60.0   109.5    0  #  HB2-  CB-  CA
+       kill_ang   367   365   368    0
+       add_ang    367   365   368    35.0   109.5    0    #  HB2-  CB-  SG
+         kill_ang   368   365   363    0
+         add_ang    368   365   363    50.0   108.6    0  #   CA-  CB-  SG
+#      frm angles
+       kill_ang  3303  3302  3282    0
+       add_ang   3303  3302  3282    82.5   120.0    1    #    O-   C-  CA
+       add_ang   3303  3302  3282    50.0   109.5    2    #    O-   C-  CA
+         kill_ang  3303  3302  3304    0
+         add_ang   3303  3302  3304    82.5   120.0    1  #    O-   C-   N
+         add_ang   3303  3302  3304    66.5   111.3    2  #    O-   C-   N
+       kill_ang  3304  3302  3282    0
+       add_ang   3304  3302  3282    70.0   120.0    1    #   CA-   C-   N
+       add_ang   3304  3302  3282    57.5   109.5    2    #   CA-   C-   N
+         kill_ang  3302  3304  3306    0
+         add_ang   3302  3304  3306    65.0   120.0    1  #    C-   N-  C1
+         add_ang   3302  3304  3306    70.0   120.0    2  #    C-   N-  C1
+       kill_ang  3302  3304  3305    0
+       add_ang   3302  3304  3305    35.0   120.0    1    #    C-   N-  HN
+       add_ang   3302  3304  3305    38.0   120.0    2    #    C-   N-  HN
+         kill_ang  3305  3304  3306    0
+         add_ang   3305  3304  3306    35.0   120.0    0  #   HN-   N-  C1
+#      cys-frm angles
+       kill_ang   365   368  3302    2
+       add_ang    365   368  3302    62.0   99.0     2    #   CB-  SG-  C
+         kill_ang   368  3302  3282    2
+         add_ang    368  3302  3282    50.0   108.6    2  #   SG-   C-  CA
+       kill_ang   368  3302  3303    2
+       add_ang    368  3302  3303    50.0   108.6    2    #   SG-   C-   O
+         kill_ang   368  3302  3304    2
+         add_ang    368  3302  3304    50.0   108.6    2  #   SG-   C-   N
+
+        evb_parm
+            iflag_r4 0
+        end
+
+        rest_out fep_00.res
+
+        md_parm
+            short_log
+            nsteps          10000
+            ss              0.001
+            temperature     300.0
+            movie_co        all wat
+            movie_fq        100
+            ex_w_center     368
+            water_r         20
+            region2a_r      20
+            langevin_r      30
+            constraint_pair 368 3302   5.0   3.5   -3.5  #SG(CYS) -- C(ARG)
+            constraint_pair 362 3303   2.0   2.5   -2.5  #O(ARR215) -- HN(CYS25)
+            induce          1
+            indforce        1
+            no_bulk
+        end
+    end
+end
+
+analyze
+    makepdb
+        residue all+w
+        file_nm end.pdb
+    end
+
+    viewmovie
+        multiframe_xmol $OUT_DIR/movie.dat 51
+    end
+end
+
+end
