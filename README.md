@@ -5,5 +5,5 @@ This repository hosts auxiliary files to the Supporting Information of the follo
 papain_NA_fep.inp provides the Molaris input for the nucleophilic attack step inside papain enzyme.
 
 The angle parameters used inside the input file are taken from ENZYMIX FF  
-Bond, torsion, and vdW parameters are taken directly by Molaris from ENZYMIX FF files.
+Bond, torsion, and vdW parameters are taken directly by the Molaris program from ENZYMIX FF files.
 
